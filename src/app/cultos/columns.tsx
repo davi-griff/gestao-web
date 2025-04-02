@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/dropdown-menu"
 
 import { useRouter } from "next/navigation"
-
+import { format } from "date-fns"
 
 export type Culto = {
   id: number;
@@ -32,6 +32,10 @@ export const columns: ColumnDef<Culto>[] = [
   {
     header: "Data",
     accessorKey: "data",
+    cell: ({ row }) => {
+      const culto = row.original
+      return <span>{format(new Date(culto.data), "dd/MM/yyyy")}</span>
+    }
   },
   {
     header: "Pastor",

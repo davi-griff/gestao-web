@@ -93,11 +93,11 @@ const data = {
       items: [
         {
           title: "Turmas",
-          url: "#",
+          url: "/escola_biblica/turmas",
         },
         {
           title: "Alunos",
-          url: "#",
+          url: "/escola_biblica/alunos",
         },
       ],
     },
