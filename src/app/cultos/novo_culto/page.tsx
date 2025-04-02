@@ -1,4 +1,4 @@
-import FormNovoCulto from "@/components/form-novo-culto"
+import FormNovoCulto from "@/components/form-culto"
 
 export default function Home() {
   return (

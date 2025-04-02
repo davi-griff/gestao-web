@@ -1,4 +1,4 @@
-import { DataTable } from "@/app/cultos/data-table";
+import { DataTable } from "@/components/data-table";
 import { Culto, columns } from "./columns";
 import { PlusIcon } from "lucide-react";
 import ButtonRedirect from "@/components/button-redirect";

@@ -72,18 +72,18 @@ const data = {
       url: "#",
       icon: Bot,
       items: [
-        {
-          title: "Visão Geral",
-          url: "#",
-        },
+        // {
+        //   title: "Visão Geral",
+        //   url: "#",
+        // },
         {
           title: "Lista de Celulas",
-          url: "#",
+          url: "/celulas",
         },
-        {
-          title: "Registro de Celula",
-          url: "#",
-        },
+        // {
+        //   title: "Registro de Celula",
+        //   url: "#",
+        // },
       ],
     },
     {

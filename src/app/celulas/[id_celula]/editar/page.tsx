@@ -2,23 +2,23 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import AttendanceForm, { type CultoFormData } from "@/components/form-culto"
+import HopeGroupForm, { type HopeGroupData } from "@/components/form-celula"
 import { Loader2 } from "lucide-react"
 
-export default function EditCultoPage({ params }: { params: { id: string } }) {
+export default function EditHopeGroupPage({ params }: { params: { id: string } }) {
   const router = useRouter()
-  const [culto, setCulto] = useState<CultoFormData | null>(null)
+  const [grupo, setGrupo] = useState<HopeGroupData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const fetchCulto = async () => {
+    const fetchGrupo = async () => {
       setIsLoading(true)
       setError(null)
 
       try {
         // Replace with your actual API endpoint
-        // const response = await fetch(`/api/cultos/${params.id}`)
+        // const response = await fetch(`/api/grupos/${params.id}`)
         // const data = await response.json()
 
         // Simulating API response for demonstration
@@ -26,28 +26,27 @@ export default function EditCultoPage({ params }: { params: { id: string } }) {
 
         // Mock data for demonstration
         const data = {
-          id: params.id,
-          nome: "Culto de Domingo",
-          data: new Date("2024-05-15"),
-          pastor: "2", // ID do pastor
-          qtd_jovens: 15,
-          qtd_adultos: 25,
-          qtd_criancas: 10,
-          qtd_visitantes: 30,
-          qtd_batismo: 5,
-          qtd_conversao: 2,
+          id: Number.parseInt(params.id),
+          nome: "Hope 1",
+          lider: "Pastor Lucas",
+          supervisor: "1", // ID do supervisor
+          qtd_membros: 10,
+          local: "Tv. Jose Pio 157",
+          rede: "Hope",
+          dia_da_semana: "Sabado",
+          horario: "17:00",
         }
 
-        setCulto(data)
+        setGrupo(data)
       } catch (error) {
-        console.error("Erro ao carregar culto:", error)
-        setError("Não foi possível carregar os dados do culto. Tente novamente mais tarde.")
+        console.error("Erro ao carregar grupo:", error)
+        setError("Não foi possível carregar os dados do grupo. Tente novamente mais tarde.")
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchCulto()
+    fetchGrupo()
   }, [params.id])
 
   const handleSubmitSuccess = () => {
@@ -63,7 +62,7 @@ export default function EditCultoPage({ params }: { params: { id: string } }) {
     return (
       <div className="container mx-auto py-10 px-4 flex flex-col items-center justify-center min-h-[50vh]">
         <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-muted-foreground">Carregando dados do culto...</p>
+        <p className="text-muted-foreground">Carregando dados do grupo...</p>
       </div>
     )
   }
@@ -86,9 +85,9 @@ export default function EditCultoPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="container mx-auto py-10 px-4">
-      <h1 className="text-3xl font-bold mb-6 text-center">Editar Registro de Culto</h1>
+      <h1 className="text-3xl font-bold mb-6 text-center">Editar Grupo Hope</h1>
       <div className="max-w-2xl mx-auto">
-        {culto && <AttendanceForm initialData={culto} onSubmitSuccess={handleSubmitSuccess} onCancel={handleCancel} />}
+        {grupo && <HopeGroupForm initialData={grupo} onSubmitSuccess={handleSubmitSuccess} onCancel={handleCancel} />}
       </div>
     </main>
   )

@@ -1,14 +1,11 @@
 "use client";
 
-
 import {
     ColumnDef,
     flexRender,
     getCoreRowModel,
     useReactTable,
   } from "@tanstack/react-table"
-  
-  import { useRouter } from "next/navigation";
 
   import {
     Table,
@@ -31,8 +28,6 @@ import {
         columns,
         getCoreRowModel: getCoreRowModel(),
     })
-
-    const router = useRouter();
 
     return (
         <div className="rounded-md border">
