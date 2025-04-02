@@ -59,14 +59,10 @@ const data = {
       items: [
         {
           title: "Registro de Cultos",
-          url: "#",
+          url: "/cultos",
         },
         {
-          title: "Métricas do Culto",
-          url: "#",
-        },
-        {
-          title: "Histórico de Cultos",
+          title: "Métricas do Culto - Em Desenvolvimento",
           url: "#",
         },
       ],
