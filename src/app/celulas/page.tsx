@@ -1,3 +1,4 @@
+
 import ButtonRedirect from "@/components/button-redirect";
 import { Celula, columns } from "./columns";
 
