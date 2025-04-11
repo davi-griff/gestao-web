@@ -1,15 +1,20 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
-import HopeGroupForm, { type HopeGroupData } from "@/components/form-celula"
+import { use, useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
+import { Celula } from "@/types/celula"
 import { Loader2 } from "lucide-react"
+import { getCelula } from "@/utils/gestao-api/celula-client"
+import GroupForm from "@/components/form-celula"
 
-export default function EditHopeGroupPage({ params }: { params: { id: string } }) {
+export default function EditHopeGroupPage() {
   const router = useRouter()
-  const [grupo, setGrupo] = useState<HopeGroupData | null>(null)
+  const [grupo, setGrupo] = useState<Celula | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  const params = useParams<{ id_celula: string }>();
+  const id_celula = params.id_celula;
 
   useEffect(() => {
     const fetchGrupo = async () => {
@@ -17,25 +22,7 @@ export default function EditHopeGroupPage({ params }: { params: { id: string } }
       setError(null)
 
       try {
-        // Replace with your actual API endpoint
-        // const response = await fetch(`/api/grupos/${params.id}`)
-        // const data = await response.json()
-
-        // Simulating API response for demonstration
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-
-        // Mock data for demonstration
-        const data = {
-          id: Number.parseInt(params.id),
-          nome: "Hope 1",
-          lider: "Pastor Lucas",
-          supervisor: "1", // ID do supervisor
-          qtd_membros: 10,
-          local: "Tv. Jose Pio 157",
-          rede: "Hope",
-          dia_da_semana: "Sabado",
-          horario: "17:00",
-        }
+        const data = await getCelula(Number.parseInt(id_celula))
 
         setGrupo(data)
       } catch (error) {
@@ -47,16 +34,7 @@ export default function EditHopeGroupPage({ params }: { params: { id: string } }
     }
 
     fetchGrupo()
-  }, [params.id])
-
-  const handleSubmitSuccess = () => {
-    // Navigate back to the list or detail page after successful update
-    router.push("/")
-  }
-
-  const handleCancel = () => {
-    router.back()
-  }
+  }, [id_celula])
 
   if (isLoading) {
     return (
@@ -87,7 +65,7 @@ export default function EditHopeGroupPage({ params }: { params: { id: string } }
     <main className="container mx-auto py-10 px-4">
       <h1 className="text-3xl font-bold mb-6 text-center">Editar Grupo Hope</h1>
       <div className="max-w-2xl mx-auto">
-        {grupo && <HopeGroupForm initialData={grupo} onSubmitSuccess={handleSubmitSuccess} onCancel={handleCancel} />}
+        {grupo && <GroupForm initialData={grupo}/>}
       </div>
     </main>
   )

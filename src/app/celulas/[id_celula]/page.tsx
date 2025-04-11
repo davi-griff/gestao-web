@@ -6,96 +6,23 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card"
-import { Celula } from "../columns"
-import { Encontro, columns } from "./columns-encontros";
-import { Membro, columnsMembros } from "./columns-membros";
+import { Celula } from "@/types/celula";
+import { EncontroCelula } from "@/types/encontroCelula";
+import { Membro } from "@/types/membro";
+import { columns } from "./columns-encontros";
+import { columnsMembros } from "./columns-membros";
 import { DataTable } from "@/components/data-table";
 import ButtonRedirect from "@/components/button-redirect";
 import { PlusIcon } from "lucide-react";
-
-const Celulas: Record<number, Celula> = {
-    1: {
-        id: 1,
-        nome: "Celula 1",
-        lider: "Pastor 1",
-        supervisor: "Pastor 2",
-        qtd_membros: 10,
-        local: "Local 1",
-        rede: "Rede 1",
-        dia_da_semana: "Domingo",
-        horario: "10:00",
-    },
-    2: {
-        id: 2,
-        nome: "Celula 2",
-        lider: "Pastor 2",
-        supervisor: "Pastor 3",
-        qtd_membros: 10,
-        local: "Local 2",
-        rede: "Rede 2",
-        dia_da_semana: "Segunda",
-        horario: "10:00",
-    }
-}
-
-async function getCelula(id_celula: number) {
-    return Celulas[id_celula];
-}
-
-const Encontros: Encontro[] = [
-    {
-        id: 1,
-        data: "2024-01-01",
-        pregador: "Pastor 1",
-        qtd_presentes: 10,
-        qtd_visitantes: 10,
-        oferta_arrecadada: 100,
-    },
-    {
-        id: 2,
-        data: "2024-01-02",
-        pregador: "Pastor 2",
-        qtd_presentes: 10,
-        qtd_visitantes: 10,
-        oferta_arrecadada: 100,
-    }
-]
-
-const Membros: Membro[] = [
-    {
-        id: 1,
-        nome: "Membro 1",
-        telefone: "1234567890",
-        email: "membro1@example.com",
-        data_nascimento: "2024-01-01",
-        endereco: "Endereço 1",
-    },
-    {
-        id: 2,
-        nome: "Membro 2",
-        telefone: "1234567890",
-        email: "membro2@example.com",
-        data_nascimento: "2024-01-02",
-        endereco: "Endereço 2",
-    }
-]
-
-
-
-
-async function getEncontros(id_celula: number) {
-    return Encontros;
-}
-
-async function getMembros(id_celula: number): Promise<Membro[]> {
-    return Membros;
-}
+import { getCelula, getEncontros, getMembros } from "@/utils/gestao-api/celula-client";
+import { getSupervisor } from "@/utils/gestao-api/supervisor-client";
 
 export default async function CelulaPage({ params }: { params: { id_celula: string } }) {
     const { id_celula } = await params;
     const celula = await getCelula(Number(id_celula));
     const encontros = await getEncontros(Number(id_celula));
     const membros = await getMembros(Number(id_celula));
+    const supervisor = await getSupervisor(celula.supervisor);
 
     return (
         <div className="container mx-auto py-8 px-4">
@@ -116,7 +43,7 @@ export default async function CelulaPage({ params }: { params: { id_celula: stri
                         <CardTitle>Supervisor</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <p>{celula.supervisor}</p>
+                        <p>{supervisor.nome}</p>
                     </CardContent>
                 </Card>
 

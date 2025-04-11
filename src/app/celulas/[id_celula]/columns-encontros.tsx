@@ -1,17 +1,11 @@
 "use client"
 
+import { EncontroCelula } from "@/types/encontroCelula";
 import { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-export type Encontro = {
-    id: number;
-    data: string;
-    pregador: string;
-    qtd_presentes: number;
-    qtd_visitantes: number;
-    oferta_arrecadada: number;
-}
 
-export const columns: ColumnDef<Encontro>[] = [
+
+export const columns: ColumnDef<EncontroCelula>[] = [
     {
         header: "Data",
         accessorKey: "data",

@@ -54,7 +54,7 @@ export const columns: ColumnDef<Turma>[] = [
     
             return (
                 <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
@@ -63,21 +63,15 @@ export const columns: ColumnDef<Turma>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuItem onClick={() => router.push(`/escola_biblica/turmas/${turma.id}`)} >
-                         <Button variant="ghost" className="h-8 w-8 p-0" >
-                            <Eye className="h-4 w-4" />
-                         </Button>
+                            <Eye className="h-4 w-4 mr-2" />
                             Detalhes
                         </DropdownMenuItem>
                         <DropdownMenuItem onClick={() => router.push(`/escola_biblica/turmas/${turma.id}/editar`)} >
-                            <Button variant="ghost" className="h-8 w-8 p-0" >
-                                <Edit className="h-4 w-4" />
-                            </Button>
+                            <Edit className="h-4 w-4 mr-2" />
                             Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                            <Button variant="ghost" className="h-8 w-8 p-0" >
-                                <Trash className="h-4 w-4" />
-                            </Button>
+                            <Trash className="h-4 w-4 mr-2" />
                             Excluir
                         </DropdownMenuItem>
                     </DropdownMenuContent>

@@ -6,16 +6,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { ColumnDef } from "@tanstack/react-table";
 import { MoreHorizontal } from "lucide-react";
 import { useRouter } from "next/navigation";
-
-export type Membro = {
-    id: number;
-    nome: string;
-    telefone: string;
-    email: string;
-    data_nascimento: string;
-    endereco: string;
-}
-
+import { Membro } from "@/types/membro";
 export const columnsMembros: ColumnDef<Membro>[] = [
     {
         header: "Nome",
@@ -45,7 +36,7 @@ export const columnsMembros: ColumnDef<Membro>[] = [
     
             return (
                 <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
@@ -54,9 +45,7 @@ export const columnsMembros: ColumnDef<Membro>[] = [
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
                         <DropdownMenuItem>
-                            <Button variant="ghost" className="h-8 w-8 p-0" >
-                                <Minus className="h-4 w-4" />
-                            </Button>
+                            <Minus className="h-4 w-4 mr-2" />
                             Remover Membro
                         </DropdownMenuItem>
                     </DropdownMenuContent>

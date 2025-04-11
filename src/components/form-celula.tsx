@@ -13,38 +13,26 @@ import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { cn } from "@/lib/utils"
-
-// Interface for supervisor data
-interface Supervisor {
-  id: string
-  nome: string
-}
-
-// Interface for form data
-export interface HopeGroupData {
-  id?: number
-  nome: string
-  lider: string
-  supervisor: string
-  qtd_membros: number
-  local: string
-  rede: string
-  dia_da_semana: string
-  horario: string
-}
-
+import { getRedes } from "@/utils/gestao-api/rede-client"
+import { Rede } from "@/types/rede"
+import { getSupervisores } from "@/utils/gestao-api/supervisor-client"
+import { Supervisor } from "@/types/supervisor"
+import { Grupo } from "@/types/grupo"
+import { submitCelula } from "@/utils/gestao-api/celula-client"
+import { useRouter } from "next/navigation"
+import { Celula } from "@/types/celula"
 // Props for the form component
 interface HopeGroupFormProps {
-  initialData?: HopeGroupData
-  onSubmitSuccess?: (data: HopeGroupData) => void
+  initialData?: Celula
+  onSubmitSuccess?: (data: Celula) => void
   onCancel?: () => void
 }
 
 const formSchema = z.object({
-  id: z.number().optional(),
+  ID: z.number().optional(),
   nome: z.string().min(1, "Nome do grupo é obrigatório"),
   lider: z.string().min(1, "Líder é obrigatório"),
-  supervisor: z.string().min(1, "Supervisor é obrigatório"),
+  supervisor: z.number().min(1, "Supervisor é obrigatório"),
   qtd_membros: z.coerce.number().int("Deve ser um número inteiro").min(0, "Não pode ser negativo"),
   local: z.string().min(1, "Local é obrigatório"),
   rede: z.string().min(1, "Rede é obrigatória"),
@@ -62,33 +50,31 @@ const diasDaSemana = [
   { value: "Sabado", label: "Sábado" },
 ]
 
-const redes = [
-  { value: "Hope", label: "Hope" },
-  { value: "Rede de Mulheres", label: "Rede de Mulheres" },
-  { value: "Rede de Homens", label: "Rede de Homens" },
-]
-
-export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }: HopeGroupFormProps) {
+export default function GroupForm({ initialData, onSubmitSuccess, onCancel }: HopeGroupFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [supervisores, setSupervisores] = useState<Supervisor[]>([])
+  const [redes, setRedes] = useState<Rede[]>([])
   const [isLoadingSupervisores, setIsLoadingSupervisores] = useState(true)
+  const [isLoadingRedes, setIsLoadingRedes] = useState(true)
   const [errorLoadingSupervisores, setErrorLoadingSupervisores] = useState<string | null>(null)
+  const [errorLoadingRedes, setErrorLoadingRedes] = useState<string | null>(null)
+  const router = useRouter()
 
   // Determine if we're in edit mode
-  const isEditMode = !!initialData?.id
+  const isEditMode = !!initialData?.ID
 
   // Set up form with either default values or initialData if provided
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      nome: "Hope 1",
-      lider: "Pastor Lucas",
-      supervisor: "",
-      qtd_membros: 10,
-      local: "Tv. Jose Pio 157",
-      rede: "Hope",
-      dia_da_semana: "Sabado",
-      horario: "17:00",
+      nome: "",
+      lider: "",
+      supervisor: 0,
+      qtd_membros: 0,
+      local: "",
+      rede: "",
+      dia_da_semana: "",
+      horario: "00:00",
     },
   })
 
@@ -99,25 +85,13 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
       setErrorLoadingSupervisores(null)
 
       try {
-        // Replace with your actual API endpoint
-        // const response = await fetch('/api/supervisores')
-        // const data = await response.json()
-
-        // Simulating API response for demonstration
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        const data = [
-          { id: "1", nome: "Pastor Rodolfo" },
-          { id: "2", nome: "Pastor Marcos" },
-          { id: "3", nome: "Pastor André" },
-          { id: "4", nome: "Pastor Carlos" },
-          { id: "5", nome: "Pastor João" },
-        ]
+        const data = await getSupervisores()
 
         setSupervisores(data)
 
         // Only set default value if we're not in edit mode and we have supervisors
         if (!isEditMode && data.length > 0 && !form.getValues("supervisor")) {
-          form.setValue("supervisor", data[0].id)
+          form.setValue("supervisor", data[0].ID)
         }
       } catch (error) {
         console.error("Erro ao carregar supervisores:", error)
@@ -126,37 +100,60 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
         setIsLoadingSupervisores(false)
       }
     }
-
     fetchSupervisores()
+  }, [form, isEditMode])
+
+  useEffect(() => {
+    const fetchRedes = async () => {
+      setIsLoadingRedes(true)
+      setErrorLoadingRedes(null)
+      try {
+        const redes = await getRedes()
+        setRedes(redes)
+
+        if (!isEditMode && redes.length > 0 && !form.getValues("rede")) {
+          form.setValue("rede", redes[0].nome)
+        }
+      } catch (error) {
+        console.error("Erro ao carregar redes:", error)
+        setErrorLoadingRedes("Não foi possível carregar a lista de redes. Tente novamente mais tarde.")
+      } finally {
+        setIsLoadingRedes(false)
+      }
+    }
+    fetchRedes()
   }, [form, isEditMode])
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
-
-      // Get supervisor name for display in toast
-      const supervisorNome = supervisores.find((p) => p.id === values.supervisor)?.nome || values.supervisor
-
-      const submittedData = {
-        ...values,
-        supervisorNome,
+      let response: Grupo
+      if (isEditMode) {
+        const celula: Grupo = {
+          ...values,
+          ID: initialData?.ID || 0,
+          supervisor: Number(values.supervisor),
+        }
+        response = await submitCelula(celula, "PUT")
+      } else {
+        const celula: Grupo = {
+          ...values,
+          ID: 0,
+          supervisor: Number(values.supervisor),
+        }
+        response = await submitCelula(celula, "POST")
+        console.log(`Grupo salvo com sucesso: ${response.ID}`)
       }
-
-      console.log(submittedData)
 
       // Different message based on create/edit
       toast.success(isEditMode ? "Grupo atualizado com sucesso!" : "Grupo salvo com sucesso!", {
         description: `Grupo "${values.nome}" ${isEditMode ? "atualizado" : "registrado"} com sucesso`,
       })
 
-      // Call the success callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess(values)
-      }
+      router.push(`/celulas/${response.ID}`)
     } catch (error) {
+      console.error("Erro ao salvar grupo:", error)
       toast.error(isEditMode ? "Erro ao atualizar" : "Erro ao salvar", {
         description: `Ocorreu um erro ao ${isEditMode ? "atualizar" : "salvar"} o grupo. Tente novamente.`,
       })
@@ -189,15 +186,15 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
             render={({ field }) => (
               <FormItem className="w-full">
                 <FormLabel>Rede</FormLabel>
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingRedes} value={field.value}>
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione uma rede" />
+                      <SelectValue placeholder={isLoadingRedes ? "Carregando redes..." : "Selecione uma rede"} />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
                     {redes.map((rede) => (
-                      <SelectItem key={rede.value} value={rede.value}>
+                      <SelectItem key={rede.ID} value={rede.nome}>
                         {rede.label}
                       </SelectItem>
                     ))}
@@ -217,7 +214,7 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
               <FormItem>
                 <FormLabel>Líder</FormLabel>
                 <FormControl>
-                  <Input placeholder="Ex: Pastor Lucas" {...field} />
+                  <Input placeholder="Ex: Pastor ..." {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -231,9 +228,8 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
               <FormItem>
                 <FormLabel>Supervisor</FormLabel>
                 <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
+                  onValueChange={(value) => field.onChange(Number(value))}
+                  value={field.value?.toString()}
                   disabled={isLoadingSupervisores}
                 >
                   <FormControl>
@@ -254,7 +250,7 @@ export default function HopeGroupForm({ initialData, onSubmitSuccess, onCancel }
                       <div className="p-2 text-center text-sm text-muted-foreground">Nenhum supervisor encontrado</div>
                     ) : (
                       supervisores.map((supervisor) => (
-                        <SelectItem key={supervisor.id} value={supervisor.id}>
+                        <SelectItem key={supervisor.ID} value={supervisor.ID.toString()}>
                           {supervisor.nome}
                         </SelectItem>
                       ))

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { ColumnDef } from "@tanstack/react-table";
@@ -6,18 +5,8 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Edit, Eye, MoreHorizontal, Trash } from "lucide-react";
+import { Celula } from "@/types/celula";
 
-export type Celula = {
-    id: number;
-    nome: string;
-    lider: string;
-    supervisor: string;
-    qtd_membros: number;
-    local: string;
-    rede: string;
-    dia_da_semana: string;
-    horario: string;
-}
 
 export const columns: ColumnDef<Celula>[] = [
     {
@@ -60,7 +49,7 @@ export const columns: ColumnDef<Celula>[] = [
     
             return (
                 <DropdownMenu>
-                    <DropdownMenuTrigger>
+                    <DropdownMenuTrigger asChild>
                         <Button variant="ghost" className="h-8 w-8 p-0">
                             <span className="sr-only">Open menu</span>
                             <MoreHorizontal className="h-4 w-4" />
@@ -68,22 +57,16 @@ export const columns: ColumnDef<Celula>[] = [
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
                         <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                        <DropdownMenuItem onClick={() => router.push(`/celulas/${celula.id}`)} >
-                         <Button variant="ghost" className="h-8 w-8 p-0" >
-                            <Eye className="h-4 w-4" />
-                         </Button>
+                        <DropdownMenuItem onClick={() => router.push(`/celulas/${celula.ID}`)} >
+                            <Eye className="h-4 w-4 mr-2" />
                             Detalhes
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => router.push(`/celulas/${celula.id}/editar`)} >
-                            <Button variant="ghost" className="h-8 w-8 p-0" >
-                                <Edit className="h-4 w-4" />
-                            </Button>
+                        <DropdownMenuItem onClick={() => router.push(`/celulas/${celula.ID}/editar`)} >
+                            <Edit className="h-4 w-4 mr-2" />
                             Editar
                         </DropdownMenuItem>
                         <DropdownMenuItem>
-                            <Button variant="ghost" className="h-8 w-8 p-0" >
-                                <Trash className="h-4 w-4" />
-                            </Button>
+                            <Trash className="h-4 w-4 mr-2" />
                             Excluir
                         </DropdownMenuItem>
                     </DropdownMenuContent>
