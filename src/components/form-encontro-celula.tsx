@@ -18,41 +18,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox"
 import { cn } from "@/lib/utils"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Membro } from "@/types/membro"
+import { createNewEncontro, getMembros } from "@/utils/gestao-api/celula-client"
+import { EncontroCelula } from "@/types/encontroCelula"
+import { useRouter, useParams } from "next/navigation"
 
-// Interface for preacher data
-interface Pregador {
-  id: string
-  nome: string
-}
-
-// Interface for member data
-interface Membro {
-  id: string
-  nome: string
-  telefone?: string
-  email?: string
-}
-
-// Interface for form data
-export interface ServicoFormData {
-  id?: number
-  data: Date
-  pregador: string
-  qtd_presentes: number
-  qtd_visitantes: number
-  oferta_arrecadada: number
-  membros_presentes: string[] // Array of member IDs who are present
-}
-
-// Props for the form component
-interface ServicoFormProps {
-  initialData?: ServicoFormData
-  onSubmitSuccess?: (data: ServicoFormData) => void
-  onCancel?: () => void
+interface EncontroCelulaFormProps {
+  initialData?: EncontroCelula
 }
 
 const formSchema = z.object({
-  id: z.number().optional(),
   data: z.date({
     required_error: "Data é obrigatória",
   }),
@@ -60,14 +35,14 @@ const formSchema = z.object({
   qtd_presentes: z.coerce.number().int("Deve ser um número inteiro").min(0, "Não pode ser negativo"),
   qtd_visitantes: z.coerce.number().int("Deve ser um número inteiro").min(0, "Não pode ser negativo"),
   oferta_arrecadada: z.coerce.number().min(0, "Não pode ser negativo"),
-  membros_presentes: z.array(z.string()),
+  membros_presentes: z.array(z.number()),
 })
 
-export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: ServicoFormProps) {
+export default function EncontroCelulaForm({  initialData }: EncontroCelulaFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [pregadores, setPregadores] = useState<Pregador[]>([])
-  const [isLoadingPregadores, setIsLoadingPregadores] = useState(true)
-  const [errorLoadingPregadores, setErrorLoadingPregadores] = useState<string | null>(null)
+  const params = useParams();
+  const id_celula = params.id_celula;
+  const router = useRouter();
 
   // Member states
   const [membros, setMembros] = useState<Membro[]>([])
@@ -76,58 +51,20 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
   const [searchTerm, setSearchTerm] = useState("")
 
   // Determine if we're in edit mode
-  const isEditMode = !!initialData?.id
+  const isEditMode = !!initialData?.ID
 
   // Set up form with either default values or initialData if provided
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: initialData || {
-      data: new Date("2024-01-01"),
+      data: new Date(),
       pregador: "",
-      qtd_presentes: 10,
+      qtd_presentes: 0,
       qtd_visitantes: 0,
-      oferta_arrecadada: 100,
-      membros_presentes: [],
+      oferta_arrecadada: 0,
+      membros_presentes: []
     },
   })
-
-  // Fetch preachers from API
-  useEffect(() => {
-    const fetchPregadores = async () => {
-      setIsLoadingPregadores(true)
-      setErrorLoadingPregadores(null)
-
-      try {
-        // Replace with your actual API endpoint
-        // const response = await fetch('/api/pregadores')
-        // const data = await response.json()
-
-        // Simulating API response for demonstration
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        const data = [
-          { id: "1", nome: "Pastor João Silva" },
-          { id: "2", nome: "Pastor Carlos Oliveira" },
-          { id: "3", nome: "Pastor Marcos Santos" },
-          { id: "4", nome: "Pastor André Souza" },
-          { id: "5", nome: "Pastor Lucas Ferreira" },
-        ]
-
-        setPregadores(data)
-
-        // Only set default value if we're not in edit mode and we have preachers
-        if (!isEditMode && data.length > 0 && !form.getValues("pregador")) {
-          form.setValue("pregador", data[0].id)
-        }
-      } catch (error) {
-        console.error("Erro ao carregar pregadores:", error)
-        setErrorLoadingPregadores("Não foi possível carregar a lista de pregadores. Tente novamente mais tarde.")
-      } finally {
-        setIsLoadingPregadores(false)
-      }
-    }
-
-    fetchPregadores()
-  }, [form, isEditMode])
 
   // Fetch members from API
   useEffect(() => {
@@ -136,29 +73,8 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
       setErrorLoadingMembros(null)
 
       try {
-        // Replace with your actual API endpoint
-        // const response = await fetch('/api/membros')
-        // const data = await response.json()
-
-        // Simulating API response for demonstration
-        await new Promise((resolve) => setTimeout(resolve, 1000))
-        const data = [
-          { id: "1", nome: "Ana Silva", telefone: "(11) 98765-4321", email: "ana@example.com" },
-          { id: "2", nome: "Bruno Oliveira", telefone: "(11) 91234-5678", email: "bruno@example.com" },
-          { id: "3", nome: "Carla Santos", telefone: "(11) 99876-5432", email: "carla@example.com" },
-          { id: "4", nome: "Daniel Souza", telefone: "(11) 98765-1234", email: "daniel@example.com" },
-          { id: "5", nome: "Eduarda Lima", telefone: "(11) 91234-8765", email: "eduarda@example.com" },
-          { id: "6", nome: "Fábio Costa", telefone: "(11) 99876-1234", email: "fabio@example.com" },
-          { id: "7", nome: "Gabriela Pereira", telefone: "(11) 98765-8765", email: "gabriela@example.com" },
-          { id: "8", nome: "Henrique Alves", telefone: "(11) 91234-1234", email: "henrique@example.com" },
-          { id: "9", nome: "Isabela Ferreira", telefone: "(11) 99876-8765", email: "isabela@example.com" },
-          { id: "10", nome: "João Ribeiro", telefone: "(11) 98765-5678", email: "joao@example.com" },
-          { id: "11", nome: "Karina Martins", telefone: "(11) 91234-4321", email: "karina@example.com" },
-          { id: "12", nome: "Lucas Barbosa", telefone: "(11) 99876-5678", email: "lucas@example.com" },
-          { id: "13", nome: "Mariana Dias", telefone: "(11) 98765-4321", email: "mariana@example.com" },
-          { id: "14", nome: "Nelson Gomes", telefone: "(11) 91234-5678", email: "nelson@example.com" },
-          { id: "15", nome: "Olívia Castro", telefone: "(11) 99876-5432", email: "olivia@example.com" },
-        ]
+        
+        const data = await getMembros(Number(id_celula))
 
         setMembros(data)
       } catch (error) {
@@ -176,7 +92,7 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
   const filteredMembros = membros.filter((membro) => membro.nome.toLowerCase().includes(searchTerm.toLowerCase()))
 
   // Handle member checkbox change
-  const handleMemberCheckboxChange = (memberId: string, checked: boolean) => {
+  const handleMemberCheckboxChange = (memberId: number, checked: boolean) => {
     const currentMembrosPresentes = form.getValues("membros_presentes")
 
     if (checked) {
@@ -197,28 +113,31 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
     setIsSubmitting(true)
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      let response: EncontroCelula
 
-      // Get preacher name for display in toast
-      const pregadorNome = pregadores.find((p) => p.id === values.pregador)?.nome || values.pregador
-
-      const submittedData = {
-        ...values,
-        pregadorNome,
+      if (isEditMode) {
+        const encontro: EncontroCelula = {
+          ...values,
+          ID: initialData?.ID || 0,
+          id_celula: Number(id_celula),
+        }
+        response = await createNewEncontro(Number(id_celula), encontro)
+      } else {
+        const encontro: EncontroCelula = {
+          ...values,
+          ID: 0,
+          id_celula: Number(id_celula),
+        }
+        response = await createNewEncontro(Number(id_celula), encontro)
+        console.log(`Encontro salvo com sucesso: ${response.ID}`)
       }
-
-      console.log(submittedData)
 
       // Different message based on create/edit
       toast.success(isEditMode ? "Registro atualizado com sucesso!" : "Registro salvo com sucesso!", {
         description: `Serviço de ${format(values.data, "dd/MM/yyyy")} ${isEditMode ? "atualizado" : "registrado"} com sucesso`,
       })
 
-      // Call the success callback if provided
-      if (onSubmitSuccess) {
-        onSubmitSuccess(values)
-      }
+      router.push(`/celulas/${id_celula}`)
     } catch (error) {
       toast.error(isEditMode ? "Erro ao atualizar" : "Erro ao salvar", {
         description: `Ocorreu um erro ao ${isEditMode ? "atualizar" : "salvar"} o registro. Tente novamente.`,
@@ -275,37 +194,9 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Pregador</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                  value={field.value}
-                  disabled={isLoadingPregadores}
-                >
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue
-                        placeholder={isLoadingPregadores ? "Carregando pregadores..." : "Selecione um pregador"}
-                      />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {isLoadingPregadores ? (
-                      <div className="flex items-center justify-center py-6">
-                        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-                      </div>
-                    ) : errorLoadingPregadores ? (
-                      <div className="p-2 text-center text-sm text-destructive">{errorLoadingPregadores}</div>
-                    ) : pregadores.length === 0 ? (
-                      <div className="p-2 text-center text-sm text-muted-foreground">Nenhum pregador encontrado</div>
-                    ) : (
-                      pregadores.map((pregador) => (
-                        <SelectItem key={pregador.id} value={pregador.id}>
-                          {pregador.nome}
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
+                <FormControl>
+                  <Input placeholder="Ex: Pastor ..." {...field} />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
@@ -401,22 +292,22 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
                       ) : (
                         <div className="max-h-60 overflow-y-auto p-1">
                           {filteredMembros.map((membro) => {
-                            const isChecked = form.getValues("membros_presentes").includes(membro.id)
+                            const isChecked = form.getValues("membros_presentes").includes(membro.ID)
 
                             return (
                               <div
-                                key={membro.id}
+                                key={membro.ID}
                                 className="flex items-center space-x-2 p-2 hover:bg-muted rounded-md"
                               >
                                 <Checkbox
-                                  id={`membro-${membro.id}`}
+                                  id={`membro-${membro.ID}`}
                                   checked={isChecked}
                                   onCheckedChange={(checked) => {
-                                    handleMemberCheckboxChange(membro.id, checked as boolean)
+                                    handleMemberCheckboxChange(membro.ID, checked as boolean)
                                   }}
                                 />
                                 <label
-                                  htmlFor={`membro-${membro.id}`}
+                                  htmlFor={`membro-${membro.ID}`}
                                   className="flex-1 text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                                 >
                                   <div className="flex flex-col">
@@ -444,12 +335,10 @@ export default function ServicoForm({ initialData, onSubmitSuccess, onCancel }: 
         </Card>
 
         <div className="flex justify-end gap-2">
-          {onCancel && (
-            <Button type="button" variant="outline" onClick={onCancel}>
-              Cancelar
-            </Button>
-          )}
-          <Button type="submit" disabled={isSubmitting || isLoadingPregadores}>
+          <Button type="button" variant="outline" onClick={() => router.push(`/celulas/${id_celula}`)}>
+            Cancelar
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

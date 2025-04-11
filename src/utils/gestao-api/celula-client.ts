@@ -146,4 +146,30 @@ export async function getMembros(id: number): Promise<Membro[]> {
     return response.json()
 }
 
+export async function createNewEncontro(id_celula: number, encontro: EncontroCelula) {
+    const supabase = await createClient()
+
+    const {data: {session}} = await supabase.auth.getSession()
+    const token = session?.access_token
+
+    if (!token) {
+        redirect('/login')
+    }
+
+    const url = `${process.env.NEXT_PUBLIC_API_URL}/celulas/${id_celula}/encontros`
+    const response = await fetch(url, {
+        method: "POST",
+        headers: {
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(encontro)
+    })
+
+    if (!response.ok) {
+        throw new Error("Erro ao criar o encontro")
+    }
+
+    return response.json()
+}
+
 
