@@ -29,6 +29,22 @@ import {
         getCoreRowModel: getCoreRowModel(),
     })
 
+    if (data == null || data.length === 0) {
+        return (
+            <div className="rounded-md border">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableCell colSpan={columns.length} className="h-24 text-center">
+                                Nenhum resultado encontrado
+                            </TableCell>
+                        </TableRow>
+                    </TableHeader>
+                </Table>
+            </div>
+        )
+    }
+
     return (
         <div className="rounded-md border">
       <Table>

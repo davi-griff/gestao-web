@@ -80,10 +80,14 @@ const data = {
           title: "Lista de Celulas",
           url: "/celulas",
         },
-        // {
-        //   title: "Registro de Celula",
-        //   url: "#",
-        // },
+        {
+          title: "Redes",
+          url: "/redes",
+        },
+        {
+          title: "Supervisores",
+          url: "/supervisores",
+        }
       ],
     },
     {

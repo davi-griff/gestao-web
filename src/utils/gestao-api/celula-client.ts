@@ -123,6 +123,11 @@ export async function getEncontros(id: number): Promise<EncontroCelula[]> {
         }
     })
 
+    if (!response.ok) {
+        // throw new Error("Erro ao buscar os encontros")
+        return []
+    }
+
     return response.json()  
 }
 
@@ -142,6 +147,11 @@ export async function getMembros(id: number): Promise<Membro[]> {
             'Authorization': `Bearer ${token}`
         }
     })
+
+    if (!response.ok) {
+        // throw new Error("Erro ao buscar os membros")
+        return []
+    }
 
     return response.json()
 }
